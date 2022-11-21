@@ -1,8 +1,8 @@
 # NTHU Online Judge
 
-Those problem are on the NTHU Online Judge.
+These problem are on the NTHU Online Judge.
 
-Most of them are picked up from following courses and solved by C / C++.
+Most of them are picked up from the following courses and solved by C or C++.
 
 - 2020 Programming I
 - 2020 Programming II
