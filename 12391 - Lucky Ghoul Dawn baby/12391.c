@@ -1,52 +1,22 @@
 #include<stdio.h>
-#include<stdlib.h>
-typedef struct _node{
-    int id, num;
-    struct _node *left, *right;
-}Node;
-Node *newNode(int id, int num){
-    Node* node = (Node*)malloc(sizeof(Node));
-    node->id = id;
-    node->num = num;
-    node->left = node->right = NULL;
-    return node;
+int TS(int x, int *arr, int l, int r){
+    if(l > r) return 0;
+    int mid1 = l+(r-l)/3, mid2 = mid1+(r-l)/3;
+    if(x < arr[mid1]) return TS(x, arr, l, mid1-1);
+    else if(x > arr[mid2]) return TS(x, arr, mid2+1, r);
+    else if(x>arr[mid1] && x<arr[mid2]) return TS(x, arr, mid1+1, mid2-1);
+    else return x==arr[mid1]?mid1+1:mid2+1;
 }
-void buildTree(Node **now, int *arr, int l, int r){
-    if(l > r) {*now = NULL; return;}
-    int mid = l+(r-l)/2;
-    *now = newNode(mid, arr[mid]);
-    buildTree(&((*now)->left), arr, l, mid-1);
-    buildTree(&((*now)->right), arr, mid+1, r);
-}
-int search(Node *now, int num){
-    if(now == NULL) return 0;
-    if(num < now->num) return search(now->left, num);
-    else if(num > now->num) return search(now->right, num);
-    else return now->id;
-}
-void freeTree(Node *now){
-    if(now == NULL) return;
-    freeTree(now->left);
-    freeTree(now->right);
-    free(now);
-}
+int n, q, x, v, s[2000005];
 int main(void){
-    int n, q;
     while(~scanf("%d %d", &n, &q)){
-        int *a = (int*)malloc((n+1)*sizeof(int));
-        for(int i = 1; i <= n; i++)
-            scanf("%d", &a[i]);
-        Node *root = NULL;
-        buildTree(&root, a, 1, n);
-        free(a);
+        for(int i = 0; i < n; i++) scanf("%d", s+i);
         while(q--){
-            int num;
-            scanf("%d", &num);
-            int ans = search(root, num);
-            if(ans) printf("%d\n", ans);
+            scanf("%d", &x);
+            v = TS(x, s, 0, n-1);
+            if(v) printf("%d\n", v);
             else printf("Break your bridge!\n");
         }
-        freeTree(root);
     }
     return 0;
 }

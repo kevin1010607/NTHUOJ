@@ -1,50 +1,45 @@
 #include<stdio.h>
 #include<stdlib.h>
-static int id;
 typedef struct _node{
-    int data;
+    int val;
     struct _node *left, *right;
 }Node;
-Node *newNode(int data){
-    Node *node = (Node*)malloc(sizeof(Node));
-    node->data = data;
-    node->left = node->right = NULL;
-    return node;
+Node *newNode(int val){
+    Node *ret = (Node*)malloc(sizeof(Node));
+    ret->val = val, ret->left = ret->right = NULL;
+    return ret;
 }
-Node *buildTree(int *inorder, int *postorder, int in_start, int in_end){
-    if(in_start > in_end) return NULL;
-    int p;
-    for(p = in_start; p <= in_end; p++)
-        if(*postorder == inorder[p]) break;
-    Node *node = newNode(*postorder);
-    node->left = buildTree(inorder, postorder-1-(in_end-p), in_start, p-1);
-    node->right = buildTree(inorder, postorder-1, p+1, in_end);
-    return node;
+Node *buildTree(int *inorder, int *postorder, int size){
+    if(size <= 0) return NULL;
+    Node *root = newNode(postorder[size-1]);
+    int idx = 0;
+    while(inorder[idx] != postorder[size-1]) idx++;
+    root->left = buildTree(inorder, postorder, idx);
+    root->right = buildTree(inorder+idx+1, postorder+idx, size-idx-1);
+    return root;
 }
-void printPreorder(Node *now){
-    if(now == NULL) return;
-    printf("%d ", now->data);
-    printPreorder(now->left);
-    printPreorder(now->right);
+void preorder(Node *root){
+    if(!root) return;
+    printf(" %d", root->val);
+    preorder(root->left);
+    preorder(root->right);
 }
-void freeTree(Node *now){
-    if(now == NULL) return;
-    freeTree(now->left);
-    freeTree(now->right);
-    free(now);
+void freeTree(Node *root){
+    if(!root) return;
+    freeTree(root->left);
+    freeTree(root->right);
+    free(root);
 }
+int n, id, in[105], post[105];
 int main(void){
-    int n;
     while(~scanf("%d", &n)){
-        int inorder[100], postorder[100];
-        for(int i = 0; i < n; i++)
-            scanf("%d", inorder+i);
-        for(int i = 0; i < n; i++)
-            scanf("%d", postorder+i);
-        Node *root = buildTree(inorder, postorder+n-1, 0, n-1);
-        printf("testcase%d: ", ++id);
-        printPreorder(root);
-        puts("");
+        for(int i = 0; i < n; i++) scanf("%d", in+i);
+        for(int i = 0; i < n; i++) scanf("%d", post+i);
+        Node *root = buildTree(in, post, n);
+        printf("testcase%d:", ++id);
+        preorder(root);
+        printf(" \n");
         freeTree(root);
     }
+    return 0;
 }

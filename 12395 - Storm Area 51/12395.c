@@ -1,86 +1,77 @@
 #include<stdio.h>
 #include<stdlib.h>
-#include<ctype.h>
-#define MAX 1005
+typedef enum{Op, Var, Num}Type;
+Type getType(char c){
+    if(c=='+' || c=='-' || c=='*' || c=='/') return Op;
+    else if(c=='x' || c=='y' || c=='z') return Var;
+    else return Num;
+}
 typedef struct _node{
+    Type type;
+    int val;
     char ch;
-    int isvar, isnum;
     struct _node *left, *right;
 }Node;
-Node *newNode(char ch, int isvar, int isnum){
-    Node *node = (Node*)malloc(sizeof(Node));
-    node->ch = ch;
-    node->isvar = isvar;
-    node->isnum = isnum;
-    node->left = node->right = NULL;
-    return node;
+Node *newNode(int val, char ch, Type type){
+    Node *res = (Node*)malloc(sizeof(Node));
+    res->val = val, res->ch = ch, res->type = type;
+    res->left = res->right = NULL;
+    return res;
 }
-char expr[MAX];
-int evaluate(Node *now, int x, int y, int z){
-    if(!now->isnum&&!now->isvar){
-        int op1 = evaluate(now->left, x, y, z);
-        int op2 = evaluate(now->right, x, y, z);
-        switch(now->ch){
-            case '+': return op1+op2;
-            case '-': return op1-op2;
-            case '*': return op1*op2;
-            case '/': return op1/op2;
-            default: return 0;
+Node* buildTree(){
+    char c = getchar();
+    Type type = getType(c);
+    Node *root = newNode(0, c, type);
+    if(type == Op){
+        getchar();
+        root->left = buildTree();
+        root->right = buildTree();
+    }
+    else if(type == Num){
+        ungetc(c, stdin);
+        scanf("%d", &(root->val));
+        getchar();
+    }
+    else if(type == Var) getchar();
+    return root;
+}
+void Inorder(Node *root){
+    if(!root) return;
+    Inorder(root->left);
+    root->type==Num?printf("%d", root->val):printf("%c", root->ch);
+    Inorder(root->right);
+}
+void freeTree(Node *root){
+    if(!root) return;
+    freeTree(root->left);
+    freeTree(root->right);
+    free(root);
+}
+int evaluate(Node *root, int x, int y, int z){
+    if(root->type == Op){
+        int l = evaluate(root->left, x, y, z);
+        int r = evaluate(root->right, x, y, z);
+        switch(root->ch){
+            case'+': return l+r;
+            case'-': return l-r;
+            case'*': return l*r;
+            case'/': return l/r;
         }
     }
-    else if(now->isvar){
-        switch(now->ch){
-            case 'x': return x;
-            case 'y': return y;
-            case 'z': return z;
-            default: return 0;
+    else if(root->type == Var){
+        switch(root->ch){
+            case'x': return x;
+            case'y': return y;
+            case'z': return z;
         }
     }
-    else if(now->isnum) return (int)(now->ch);
-    return 0;
-}
-void builtTree(Node **now){
-    static int idx;
-    while(isspace(expr[idx])) idx++;
-    if(!isdigit(expr[idx])){
-        if(expr[idx]>='x'&&expr[idx]<='z'){
-            *now = newNode(expr[idx], 1, 0);
-            idx++;
-        }
-        else{
-            *now = newNode(expr[idx], 0, 0);
-            idx++;
-            builtTree(&((*now)->left));
-            builtTree(&((*now)->right));
-        }
-    }
-    else{
-        int num = expr[idx]-'0';
-        while(isdigit(expr[++idx]))
-            num = 10*num+expr[idx]-'0';
-        *now = newNode((char)num, 0, 1);
-    }
-}
-void printInorder(Node *now){
-    if(now == NULL) return;
-    printInorder(now->left);
-    if(now->isnum) printf("%d", now->ch);
-    else printf("%c", now->ch);
-    printInorder(now->right);
-}
-void freeTree(Node *now){
-    if(now == NULL) return;
-    freeTree(now->left);
-    freeTree(now->right);
-    free(now);
+    return root->val;
 }
 int main(void){
     int x, y, z;
-    scanf("%[^\n]", expr);
+    Node *root = buildTree();
     scanf("%d %d %d", &x, &y, &z);
-    Node *root = NULL;
-    builtTree(&root);
-    printInorder(root);
+    Inorder(root);
     puts("");
     printf("%d\n", evaluate(root, x, y, z));
     freeTree(root);

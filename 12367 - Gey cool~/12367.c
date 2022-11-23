@@ -1,21 +1,16 @@
 #include<stdio.h>
-long long prefix[2000005];
+int n, q, a, b, Ma, Mb;
+long long dp[2000005], tmp, M;
 int main(void){
-    int n, q;
     while(~scanf("%d %d", &n, &q)){
-        for(int i = 1, val; i <= n; i++){
-            scanf("%d", &val);
-            prefix[i] = prefix[i-1]+val;
-        }
-        int a, b, x, y;
-        long long tmp, max = -1;
+        dp[0] = M = 0;
+        for(int i = 0; i < n; i++) scanf("%lld", &tmp), dp[i+1] = dp[i]+tmp;
         while(q--){
             scanf("%d %d", &a, &b);
-            if(a > b) tmp = prefix[n]-prefix[a-1]+prefix[b];
-            else tmp = prefix[b]-prefix[a-1];
-            if(tmp > max) {x = a, y = b, max = tmp;}
+            tmp = (a>b?(dp[n]-dp[a-1]+dp[b]):(dp[b]-dp[a-1]));
+            if(tmp > M) Ma = a, Mb = b, M = tmp;
         }
-        printf("Max_range: (%d,%d); Value: %lld\n", x, y, max);
+        printf("Max_range: (%d,%d); Value: %lld\n", Ma, Mb, M);
     }
     return 0;
 }

@@ -1,59 +1,56 @@
 #include<stdio.h>
 #include<stdlib.h>
-#define mod 1000000007
+#define MOD 1000000007
 typedef struct _node{
-    int id, data;
+    int val, idx;
     struct _node *left, *right;
 }Node;
-Node *newNode(int data, int id){
-    Node *node = (Node*)malloc(sizeof(Node));
-    node->data = data;
-    node->id = id;
-    node->left = node->right = NULL;
-    return node;
+Node *newNode(int val, int idx){
+    Node *ret = (Node*)malloc(sizeof(Node));
+    ret->val = val, ret->idx = idx;
+    ret->left = ret->right = NULL;
+    return ret;
 }
-Node* Insert(Node *node, int data, int id){
-    if(node == NULL) node = newNode(data, id);
-    if(data < node->data) node->left = Insert(node->left, data, id);
-    else if(data > node->data) node->right = Insert(node->right, data, id);
-    return node;
+Node *insert(Node *root, int val, int idx){
+    if(!root) return newNode(val, idx);
+    if(val < root->val) root->left = insert(root->left, val, idx);
+    else if(val > root->val) root->right = insert(root->right, val, idx);
+    return root;
 }
-int Search(Node *node, int data){
-    if(node == NULL) return 0;
-    if(data < node->data) return Search(node->left, data);
-    else if(data > node->data) return Search(node->right, data);
-    else return node->id;
+int search(Node *root, int val){
+    if(!root) return -1;
+    if(val == root->val) return root->idx;
+    else if(val < root->val) return search(root->left, val);
+    else return search(root->right, val);
 }
-void freeTree(Node *now){
-    if(now == NULL) return;
-    freeTree(now->left);
-    freeTree(now->right);
-    free(now);
+void freeTree(Node *root){
+    if(!root) return;
+    freeTree(root->left);
+    freeTree(root->right);
+    free(root);
 }
-long long two_power(int n){
-    if(n == 1) return 2;
-    long long tmp = two_power(n/2);
-    tmp = (tmp*tmp)%mod;
-    if(n%2 == 0) return tmp;
-    else return (2*tmp)%mod;
+int power(int num){
+    if(num == 1) return 2;
+    long long p = power(num/2);
+    p = (p*p)%MOD;
+    return num%2?(p*2)%MOD:p;
 }
-long long method(int n){
-    if(n%2 == 1) return 0;
-    else return two_power(n/2);
+int m(int num){
+    if(num%2 == 1) return 0;
+    return power(num/2);
 }
+int n, q, val, res;
 int main(void){
-    int n, q;
     while(~scanf("%d %d", &n, &q)){
         Node *root = NULL;
-        for(int i = 1, val; i <= n; i++){
+        for(int i = 1; i <= n; i++){
             scanf("%d(/`A`)/ ~I__I", &val);
-            root = Insert(root, method(val), i);
+            root = insert(root, m(val), i);
         }
-        int num;
         while(q--){
-            scanf("%d", &num);
-            int ans = Search(root, num);
-            if(ans) printf("%d\n", ans);
+            scanf("%d", &val);
+            res = search(root, val);
+            if(res != -1) printf("%d\n", res);
             else printf("Go Down Chicken 404\n");
         }
         freeTree(root);
