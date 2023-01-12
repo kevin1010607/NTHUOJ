@@ -13,8 +13,10 @@ int main(void){
         for(int i = a; i <= b; i++)
             dp[i+b]++, dp[i+c+1]--;
         for(int i = a+b; i <= b+c; i++){
-            dp[i] = dp[i-1]+dp[i];
-            if(i-1 >= c) res += (ll)dp[i]*(min(i-1, d)-c+1);
+            dp[i] += dp[i-1];
+            // x < i, c <= x <= d, --> l <= x <= r
+            int l = c, r = min(d, i-1);
+            res += (ll)dp[i]*(max(0, r-l+1));
         }
         cout << res << "\n";
     }
